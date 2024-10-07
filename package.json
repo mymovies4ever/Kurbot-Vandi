@@ -1,0 +1,10 @@
+{
+  "name": "telegram-bot-vercel",
+  "version": "1.0.0",
+  "main": "bot.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "telegraf": "^3.38.0",
+    "node-fetch": "^2.6.1"
+  }
+}
