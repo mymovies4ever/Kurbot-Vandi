@@ -1,12 +1,12 @@
 import os
 import requests
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# API Keys
+# API Key
 RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY")
 
 # FastAPI app
@@ -21,14 +21,25 @@ def get_vehicle_info(request_id):
     }
     params = {"request_id": request_id}
 
-    response = requests.get(url, headers=headers, params=params)
-    return response.json() if response.status_code == 200 else {"error": "Failed to fetch data"}
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return {"error": f"API request failed: {str(e)}"}
 
-# Endpoint for vehicle search
+# API Routes
 @app.get("/")
 def home():
     return {"message": "Vehicle RC Bot is running!"}
 
 @app.get("/vehicle/{request_id}")
 def fetch_vehicle(request_id: str):
-    return get_vehicle_info(request_id)
+    if not request_id:
+        raise HTTPException(status_code=400, detail="Request ID is required")
+    
+    data = get_vehicle_info(request_id)
+    if "error" in data:
+        raise HTTPException(status_code=500, detail=data["error"])
+    
+    return data
